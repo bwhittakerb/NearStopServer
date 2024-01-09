@@ -4,6 +4,8 @@ import SwiftGTFS
 extension StopArrivals: Content {}
 
 func routes(_ app: Application) throws {
+
+    //some basic heartbeat stuff in the sample
     app.get { req async in
         "It works!"
     }
@@ -12,55 +14,31 @@ func routes(_ app: Application) throws {
         "Hello, world!"
     }
 
-    // 1
-app.get("hello", ":name") { req async throws -> String in
-    // 2
-    let name = try req.parameters.require("name")
-    // 3
-    return "Hello, \(name.capitalized)!"
-}
+    //the actual interesting endpoint
+    app.get("api", "nearstops") { req async throws -> [StopArrivals] in
+        do {
+            let queryParameters = try req.query.decode(BusStopRequest.self)
 
-// 1
-app.get("json", ":name") { req async throws -> UserResponse in
-    // 2
-    let name = try req.parameters.require("name")
-    let message = "Hello, \(name.capitalized)!"
-    // 3
-    return UserResponse(message: message)
-}
+            let stopResults = NearbyBusses.retrieveStops(location: Coordinates(lat: queryParameters.latitude, long: queryParameters.longitude))
 
-app.get("api", "nearstops") { req async throws -> [StopArrivals] in
-    do {
-        let queryParameters = try req.query.decode(BusStopRequest.self)
+            let arrivalsResults = NearbyBusses.retrieveRecentArrivalsByStop(stops: stopResults, arrivalThresholdInHours: 1)
 
-        let stopResults = NearbyBusses.retrieveStops(location: Coordinates(lat: queryParameters.latitude, long: queryParameters.longitude))
+            // I sorta wonder if I should be providing datetime serialized strings in the JSON
+            // object in the local date format of Edmonton.
 
-        let arrivalsResults = NearbyBusses.retrieveRecentArrivalsByStop(stops: stopResults, arrivalThresholdInHours: 1)
-
-        // let encoder = JSONEncoder()
-        // encoder.dateEncodingStrategy = .iso8601 // Set the date encoding strategy to ISO 8601 format
-        // if let encodedData = try? encoder.encode(arrivalsResults),
-        // let jsonString = String(data: encodedData, encoding: .utf8) {
-        //     print(jsonString)
-
-
-
-
-        return arrivalsResults
-    } catch {
-        req.logger.error("Failed to decode UserInfo from query: \(error.localizedDescription)")
-        throw Abort(.badRequest, reason: "Failed to decode parameters. Error: \(error.localizedDescription)")
+            return arrivalsResults
+        } catch {
+            req.logger.error("Failed to decode UserInfo from query: \(error.localizedDescription)")
+            throw Abort(.badRequest, reason: "Failed to decode parameters. Error: \(error.localizedDescription)")
+        }
     }
-}
 
-// 1
-app.post("user-info") { req async throws -> UserResponse in
-    // 2
-    let userInfo = try req.content.decode(UserInfo.self)
-    // 3
-    let message = "Hello, \(userInfo.name.capitalized)! You are \(userInfo.age) years old."
-    return UserResponse(message: message)
-}
+
+    app.post("user-info") { req async throws -> UserResponse in
+        let userInfo = try req.content.decode(UserInfo.self)
+        let message = "Hello, \(userInfo.name.capitalized)! You are \(userInfo.age) years old."
+        return UserResponse(message: message)
+    }
 
 }
 
