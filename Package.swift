@@ -9,12 +9,14 @@ let package = Package(
     dependencies: [
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.89.0"),
+        .package(name: "SwiftGTFS", path: "../../SwiftGTFS")
     ],
     targets: [
         .executableTarget(
             name: "App",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "SwiftGTFS", package: "SwiftGTFS"),
             ]
         ),
         .testTarget(name: "AppTests", dependencies: [
