@@ -17,3 +17,4 @@ It requires my SwiftGTFS project as a dependency.
 ## TODOs
 - Write out request time and datestamp in log/console for each request (although I don't want to track personal info like geolocation)
 - Implement optional parameters in get request to change radius of bus stop search and time window.
+- Figure out Cross Site Scripting to allow it to be a backend.
