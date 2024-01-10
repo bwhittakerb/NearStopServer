@@ -13,3 +13,7 @@ Example usage:
 From coordinates 53.54077042545684, -113.50812525829596 (which are Downtown Edmonton at the intersection of Jasper and 109th)
 
 It requires my SwiftGTFS project as a dependency.
+
+## TODOs
+- Write out request time and datestamp in log/console for each request (although I don't want to track personal info like geolocation)
+- Implement optional parameters in get request to change radius of bus stop search and time window.
